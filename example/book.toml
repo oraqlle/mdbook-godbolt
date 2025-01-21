@@ -1,0 +1,6 @@
+[book]
+title = "example"
+
+[preprocessor.remove-emphasis]
+command = "cargo run --manifest-path=../Cargo.toml --locked"
+

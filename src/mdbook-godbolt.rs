@@ -1,10 +1,11 @@
 use crate::libgodbolt::GodboltSnippet;
 use std::{io, process};
+use std::ops::Range;
 
 use clap::{Arg, ArgMatches, Command};
 use mdbook::BookItem;
-use mdbook::book::{Book, Chapter};
-use mdbook::errors::Error;
+use mdbook::book::{Book};
+use mdbook::errors::{Error, Result as MdBookResult};
 use mdbook::preprocess::{CmdPreprocessor, PreprocessorContext, Preprocessor};
 use semver::{Version, VersionReq};
 
@@ -68,7 +69,7 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
 }
 
 mod libgodbolt {
-    use pulldown_cmark::{Event, Options, Parser, Tag};
+    use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
 
     use super::*;
 
@@ -85,7 +86,7 @@ mod libgodbolt {
             "mdbook-godbolt"
         }
 
-        fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
+        fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> MdBookResult<Book> {
             book.for_each_mut(|item: &mut BookItem| {
                 let BookItem::Chapter(ch) = item else {
                     return;
@@ -95,7 +96,7 @@ mod libgodbolt {
                     return;
                 }
 
-                match godbolt_snippets(ch.content) {
+                match godbolt_snippets(&ch.content) {
                     Ok(s) => ch.content = s,
                     Err(e) => eprintln!("Failed to process chapter {e:?}"),
                 }
@@ -105,74 +106,19 @@ mod libgodbolt {
         }
     }
 
-    fn godbolt_snippets(content: &str) -> Result<String, Error> {
-        let opts = Options::empty();
-        let mut godbolt_blocks = vec![];
+    fn godbolt_snippets(content: &str) -> MdBookResult<String> {
 
-        let events = Parser::new_ext(content, opts);
+        let mut buf = String::with_capacity(content.len());
 
-        for (event, span) in events.into_offset_iter() {
-            if let Event::Start(Tag::CodeBlock(pulldown_cmark::CodeBlockKind::Fenced(info_string))) = event.clone() {
-                let span_content = &content[span.start..span.end];
-                const INDENT_MAX
+        let events = Parser::new(&content).filter(|e| match e {
+            Event::Start(Tag::Emphasis) | Event::Start(Tag::Strong) => {
+                false
             }
-        }
+            Event::End(TagEnd::Emphasis) | Event::End(TagEnd::Strong) => false,
+            _ => true,
+        });
 
-        Ok(String::from(""))
-    }
-
-    #[cfg(test)]
-    mod test {
-        use super::*;
-
-        #[test]
-        fn godbolt_preprocessor_run() {
-            let input_json = r##"[
-                {
-                    "root": "/path/to/book",
-                    "config": {
-                        "book": {
-                            "authors": ["AUTHOR"],
-                            "language": "en",
-                            "multilingual": false,
-                            "src": "src",
-                            "title": "TITLE"
-                        },
-                        "preprocessor": {
-                            "nop": {}
-                        }
-                    },
-                    "renderer": "html",
-                    "mdbook_version": "0.4.21"
-                },
-                {
-                    "sections": [
-                        {
-                            "Chapter": {
-                                "name": "Chapter 1",
-                                "content": "# Chapter 1\n",
-                                "number": [1],
-                                "sub_items": [],
-                                "path": "chapter_1.md",
-                                "source_path": "chapter_1.md",
-                                "parent_names": []
-                            }
-                        }
-                    ],
-                    "__non_exhaustive": null
-                }
-            ]"##;
-            let input_json = input_json.as_bytes();
-
-            let (ctx, book) = mdbook::preprocess::CmdPreprocessor::parse_input(input_json).unwrap();
-            let expected_book = book.clone();
-            let result = GodboltSnippet::new().run(&ctx, book);
-            assert!(result.is_ok());
-
-            // The nop-preprocessor should not have made any changes to the book content.
-            let actual_book = result.unwrap();
-            assert_eq!(actual_book, expected_book);
-        }
+        Ok(pulldown_cmark_to_cmark::cmark(events, &mut buf).map(|_| buf)?)
     }
 }
 
