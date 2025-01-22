@@ -1,12 +1,11 @@
-use crate::libgodbolt::GodboltSnippet;
+use crate::libgodbolt::GodboltPreprocessor;
 use std::{io, process};
-use std::ops::Range;
 
 use clap::{Arg, ArgMatches, Command};
-use mdbook::BookItem;
-use mdbook::book::{Book};
+use mdbook::book::Book;
 use mdbook::errors::{Error, Result as MdBookResult};
-use mdbook::preprocess::{CmdPreprocessor, PreprocessorContext, Preprocessor};
+use mdbook::preprocess::{CmdPreprocessor, Preprocessor, PreprocessorContext};
+use mdbook::BookItem;
 use semver::{Version, VersionReq};
 
 fn make_cli() -> Command {
@@ -22,7 +21,7 @@ fn make_cli() -> Command {
 fn main() {
     let matches = make_cli().get_matches();
 
-    let preprocessor = GodboltSnippet::new();
+    let preprocessor = GodboltPreprocessor::new();
 
     if let Some(sub_args) = matches.subcommand_matches("supports") {
         handle_supports(&preprocessor, sub_args);
@@ -68,22 +67,33 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
     }
 }
 
+// TODO: Install of custom book.js to handle godbolt based codeblocks
+
 mod libgodbolt {
-    use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
+    use std::collections::HashMap;
+
+    use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd};
 
     use super::*;
 
-    pub struct GodboltSnippet;
+    pub struct GodboltPreprocessor;
 
-    impl GodboltSnippet {
-        pub fn new() -> GodboltSnippet {
-            GodboltSnippet
+    impl GodboltPreprocessor {
+        pub fn new() -> GodboltPreprocessor {
+            GodboltPreprocessor
         }
     }
 
-    impl Preprocessor for GodboltSnippet {
+    impl Preprocessor for GodboltPreprocessor {
         fn name(&self) -> &str {
             "mdbook-godbolt"
+        }
+
+        fn supports_renderer(&self, renderer: &str) -> bool {
+            match renderer {
+                "HTML" | "html" => true,
+                _ => false,
+            }
         }
 
         fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> MdBookResult<Book> {
@@ -96,7 +106,7 @@ mod libgodbolt {
                     return;
                 }
 
-                match godbolt_snippets(&ch.content) {
+                match preprocesses(&ch.content) {
                     Ok(s) => ch.content = s,
                     Err(e) => eprintln!("Failed to process chapter {e:?}"),
                 }
@@ -106,19 +116,51 @@ mod libgodbolt {
         }
     }
 
-    fn godbolt_snippets(content: &str) -> MdBookResult<String> {
+    struct Godbolt;
 
-        let mut buf = String::with_capacity(content.len());
+    impl Godbolt {
+        pub(crate) fn new() -> Self {
+            Godbolt
+        }
 
-        let events = Parser::new(&content).filter(|e| match e {
-            Event::Start(Tag::Emphasis) | Event::Start(Tag::Strong) => {
-                false
+        pub(crate) fn html(self, _id_counter: &mut HashMap<String, usize>) -> String {
+            String::from("html")
+        }
+    }
+
+    fn preprocesses(content: &str) -> MdBookResult<String> {
+        let mut id_counter = Default::default();
+
+        // Get markdown parsing events as iterator
+        let events = Parser::new_ext(content, Options::empty());
+
+        let mut blocks = vec![];
+
+        // Iterate through events finding codeblocks
+        for (event, span) in events.into_offset_iter() {
+            if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info_string))) = event.clone()
+            {
+                let span_content = &content[span.start..span.end];
             }
-            Event::End(TagEnd::Emphasis) | Event::End(TagEnd::Strong) => false,
-            _ => true,
-        });
 
-        Ok(pulldown_cmark_to_cmark::cmark(events, &mut buf).map(|_| buf)?)
+            let godbolt_block = match parse_codeblock() {
+                _ => Ok(()),
+            };
+
+            let new_content = godbolt_block.html(&mut id_counter);
+
+            blocks.push((span, new_content));
+        }
+
+        // TODO: Add HTML <pre> tag with godbolt class
+
+        // Reconstruct book with added godbolt class
+        let content = content.to_string();
+
+        Ok(content)
+    }
+
+    fn parse_codeblock() -> MdBookResult<Godbolt> {
+        Ok(Godbolt::new())
     }
 }
-
