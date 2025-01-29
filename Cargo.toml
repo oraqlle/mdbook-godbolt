@@ -2,7 +2,7 @@
 name = "mdbook-godbolt"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.83.0"
+rust-version = "1.84.0"
 
 authors = ["Tyler Swann <oraqlle.net@gmail.com>"]
 description = "A preprocessor for mdbook to add runnable code snippets via Godbolt"

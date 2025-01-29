@@ -1,0 +1,628 @@
+[
+  {
+    "id": "csharp",
+    "name": "C#",
+    "extensions": [
+      ".cs"
+    ],
+    "monaco": "csharp"
+  },
+  {
+    "id": "fsharp",
+    "name": "F#",
+    "extensions": [
+      ".fs"
+    ],
+    "monaco": "fsharp"
+  },
+  {
+    "id": "vb",
+    "name": "Visual Basic",
+    "extensions": [
+      ".vb"
+    ],
+    "monaco": "vb"
+  },
+  {
+    "id": "il",
+    "name": "IL",
+    "extensions": [
+      ".il"
+    ],
+    "monaco": "asm"
+  },
+  {
+    "id": "cuda",
+    "name": "CUDA C++",
+    "extensions": [
+      ".cu"
+    ],
+    "monaco": "cuda"
+  },
+  {
+    "id": "c",
+    "name": "C",
+    "extensions": [
+      ".c",
+      ".h"
+    ],
+    "monaco": "nc"
+  },
+  {
+    "id": "c++",
+    "name": "C++",
+    "extensions": [
+      ".cpp",
+      ".cxx",
+      ".h",
+      ".hpp",
+      ".hxx",
+      ".c",
+      ".cc",
+      ".ixx"
+    ],
+    "monaco": "cppp"
+  },
+  {
+    "id": "fortran",
+    "name": "Fortran",
+    "extensions": [
+      ".f90",
+      ".F90",
+      ".f95",
+      ".F95",
+      ".f"
+    ],
+    "monaco": "fortran"
+  },
+  {
+    "id": "assembly",
+    "name": "Assembly",
+    "extensions": [
+      ".asm",
+      ".6502",
+      ".s"
+    ],
+    "monaco": "asm"
+  },
+  {
+    "id": "gimple",
+    "name": "GIMPLE",
+    "extensions": [
+      ".c"
+    ],
+    "monaco": "nc"
+  },
+  {
+    "id": "objc++",
+    "name": "Objective-C++",
+    "extensions": [
+      ".mm"
+    ],
+    "monaco": "objective-c"
+  },
+  {
+    "id": "go",
+    "name": "Go",
+    "extensions": [
+      ".go"
+    ],
+    "monaco": "go"
+  },
+  {
+    "id": "objc",
+    "name": "Objective-C",
+    "extensions": [
+      ".m"
+    ],
+    "monaco": "objective-c"
+  },
+  {
+    "id": "android-java",
+    "name": "Android Java",
+    "extensions": [
+      ".java"
+    ],
+    "monaco": "java"
+  },
+  {
+    "id": "android-kotlin",
+    "name": "Android Kotlin",
+    "extensions": [
+      ".kt"
+    ],
+    "monaco": "kotlin"
+  },
+  {
+    "id": "rust",
+    "name": "Rust",
+    "extensions": [
+      ".rs"
+    ],
+    "monaco": "rust"
+  },
+  {
+    "id": "circle",
+    "name": "C++ (Circle)",
+    "extensions": [
+      ".cpp",
+      ".cxx",
+      ".h",
+      ".hpp",
+      ".hxx",
+      ".c"
+    ],
+    "monaco": "cppcircle"
+  },
+  {
+    "id": "circt",
+    "name": "CIRCT",
+    "extensions": [
+      ".mlir"
+    ],
+    "monaco": "mlir"
+  },
+  {
+    "id": "hlsl",
+    "name": "HLSL",
+    "extensions": [
+      ".hlsl",
+      ".hlsli"
+    ],
+    "monaco": "hlsl"
+  },
+  {
+    "id": "cppx",
+    "name": "Cppx",
+    "extensions": [
+      ".cpp",
+      ".cxx",
+      ".h",
+      ".hpp",
+      ".hxx",
+      ".c"
+    ],
+    "monaco": "cppp"
+  },
+  {
+    "id": "crystal",
+    "name": "Crystal",
+    "extensions": [
+      ".cr"
+    ],
+    "monaco": "crystal"
+  },
+  {
+    "id": "dart",
+    "name": "Dart",
+    "extensions": [
+      ".dart"
+    ],
+    "monaco": "dart"
+  },
+  {
+    "id": "erlang",
+    "name": "Erlang",
+    "extensions": [
+      ".erl",
+      ".hrl"
+    ],
+    "monaco": "erlang"
+  },
+  {
+    "id": "carbon",
+    "name": "Carbon",
+    "extensions": [
+      ".carbon"
+    ],
+    "monaco": "carbon"
+  },
+  {
+    "id": "cobol",
+    "name": "COBOL",
+    "extensions": [
+      ".cob",
+      ".cbl",
+      ".cobol"
+    ],
+    "monaco": "cobol"
+  },
+  {
+    "id": "hook",
+    "name": "Hook",
+    "extensions": [
+      ".hk",
+      ".hook"
+    ],
+    "monaco": "hook"
+  },
+  {
+    "id": "hylo",
+    "name": "Hylo",
+    "extensions": [
+      ".hylo"
+    ],
+    "monaco": "hylo"
+  },
+  {
+    "id": "julia",
+    "name": "Julia",
+    "extensions": [
+      ".jl"
+    ],
+    "monaco": "julia"
+  },
+  {
+    "id": "tablegen",
+    "name": "LLVM TableGen",
+    "extensions": [
+      ".td"
+    ],
+    "monaco": "tablegen"
+  },
+  {
+    "id": "cppx_blue",
+    "name": "Cppx-Blue",
+    "extensions": [
+      ".blue",
+      ".cpp",
+      ".cxx",
+      ".h",
+      ".hpp",
+      ".hxx",
+      ".c"
+    ],
+    "monaco": "cppx-blue"
+  },
+  {
+    "id": "cppx_gold",
+    "name": "Cppx-Gold",
+    "extensions": [
+      ".usyntax",
+      ".cpp",
+      ".cxx",
+      ".h",
+      ".hpp",
+      ".hxx",
+      ".c"
+    ],
+    "monaco": "cppx-gold"
+  },
+  {
+    "id": "mlir",
+    "name": "MLIR",
+    "extensions": [
+      ".mlir"
+    ],
+    "monaco": "mlir"
+  },
+  {
+    "id": "analysis",
+    "name": "Analysis",
+    "extensions": [
+      ".asm"
+    ],
+    "monaco": "asm"
+  },
+  {
+    "id": "odin",
+    "name": "Odin",
+    "extensions": [
+      ".odin"
+    ],
+    "monaco": "odin"
+  },
+  {
+    "id": "python",
+    "name": "Python",
+    "extensions": [
+      ".py"
+    ],
+    "monaco": "python"
+  },
+  {
+    "id": "racket",
+    "name": "Racket",
+    "extensions": [
+      ".rkt"
+    ],
+    "monaco": "scheme"
+  },
+  {
+    "id": "ruby",
+    "name": "Ruby",
+    "extensions": [
+      ".rb"
+    ],
+    "monaco": "ruby"
+  },
+  {
+    "id": "ada",
+    "name": "Ada",
+    "extensions": [
+      ".adb",
+      ".ads"
+    ],
+    "monaco": "ada"
+  },
+  {
+    "id": "typescript",
+    "name": "TypeScript Native",
+    "extensions": [
+      ".ts",
+      ".d.ts"
+    ],
+    "monaco": "typescript"
+  },
+  {
+    "id": "v",
+    "name": "V",
+    "extensions": [
+      ".v",
+      ".vsh"
+    ],
+    "monaco": "v"
+  },
+  {
+    "id": "vala",
+    "name": "Vala",
+    "extensions": [
+      ".vala"
+    ],
+    "monaco": "vala"
+  },
+  {
+    "id": "wasm",
+    "name": "WASM",
+    "extensions": [
+      ".wat"
+    ],
+    "monaco": "wat"
+  },
+  {
+    "id": "cpp_for_opencl",
+    "name": "C++ for OpenCL",
+    "extensions": [
+      ".clcpp",
+      ".cl",
+      ".ocl"
+    ],
+    "monaco": "cpp-for-opencl"
+  },
+  {
+    "id": "openclc",
+    "name": "OpenCL C",
+    "extensions": [
+      ".cl",
+      ".ocl"
+    ],
+    "monaco": "openclc"
+  },
+  {
+    "id": "c3",
+    "name": "C3",
+    "extensions": [
+      ".c3"
+    ],
+    "monaco": "c3"
+  },
+  {
+    "id": "llvm",
+    "name": "LLVM IR",
+    "extensions": [
+      ".ll"
+    ],
+    "monaco": "llvm-ir"
+  },
+  {
+    "id": "cmakescript",
+    "name": "CMakeScript",
+    "extensions": [
+      ".cmake"
+    ],
+    "monaco": "cmake"
+  },
+  {
+    "id": "cpp2_cppfront",
+    "name": "Cpp2-cppfront",
+    "extensions": [
+      ".cpp2"
+    ],
+    "monaco": "cpp2-cppfront"
+  },
+  {
+    "id": "d",
+    "name": "D",
+    "extensions": [
+      ".d"
+    ],
+    "monaco": "d"
+  },
+  {
+    "id": "glsl",
+    "name": "GLSL",
+    "extensions": [
+      ".glsl"
+    ],
+    "monaco": "glsl"
+  },
+  {
+    "id": "ispc",
+    "name": "ispc",
+    "extensions": [
+      ".ispc"
+    ],
+    "monaco": "ispc"
+  },
+  {
+    "id": "java",
+    "name": "Java",
+    "extensions": [
+      ".java"
+    ],
+    "monaco": "java"
+  },
+  {
+    "id": "kotlin",
+    "name": "Kotlin",
+    "extensions": [
+      ".kt"
+    ],
+    "monaco": "kotlin"
+  },
+  {
+    "id": "llvm_mir",
+    "name": "LLVM MIR",
+    "extensions": [
+      ".mir"
+    ],
+    "monaco": "llvm-ir"
+  },
+  {
+    "id": "pascal",
+    "name": "Pascal",
+    "extensions": [
+      ".pas",
+      ".dpr"
+    ],
+    "monaco": "pascal"
+  },
+  {
+    "id": "nim",
+    "name": "Nim",
+    "extensions": [
+      ".nim"
+    ],
+    "monaco": "nim"
+  },
+  {
+    "id": "pony",
+    "name": "Pony",
+    "extensions": [
+      ".pony"
+    ],
+    "monaco": "pony"
+  },
+  {
+    "id": "scala",
+    "name": "Scala",
+    "extensions": [
+      ".scala"
+    ],
+    "monaco": "scala"
+  },
+  {
+    "id": "slang",
+    "name": "Slang",
+    "extensions": [
+      ".slang"
+    ],
+    "monaco": "slang"
+  },
+  {
+    "id": "snowball",
+    "name": "Snowball",
+    "extensions": [
+      ".sn"
+    ],
+    "monaco": "swift"
+  },
+  {
+    "id": "solidity",
+    "name": "Solidity",
+    "extensions": [
+      ".sol"
+    ],
+    "monaco": "sol"
+  },
+  {
+    "id": "spice",
+    "name": "Spice",
+    "extensions": [
+      ".spice"
+    ],
+    "monaco": "spice"
+  },
+  {
+    "id": "spirv",
+    "name": "SPIR-V",
+    "extensions": [
+      ".spvasm"
+    ],
+    "monaco": "spirv"
+  },
+  {
+    "id": "javascript",
+    "name": "Javascript",
+    "extensions": [
+      ".mjs"
+    ],
+    "monaco": "typescript"
+  },
+  {
+    "id": "vyper",
+    "name": "Vyper",
+    "extensions": [
+      ".vy"
+    ],
+    "monaco": "python"
+  },
+  {
+    "id": "clean",
+    "name": "Clean",
+    "extensions": [
+      ".icl"
+    ],
+    "monaco": "clean"
+  },
+  {
+    "id": "modula2",
+    "name": "Modula-2",
+    "extensions": [
+      ".mod"
+    ],
+    "monaco": "modula2"
+  },
+  {
+    "id": "haskell",
+    "name": "Haskell",
+    "extensions": [
+      ".hs",
+      ".haskell"
+    ],
+    "monaco": "haskell"
+  },
+  {
+    "id": "ocaml",
+    "name": "OCaml",
+    "extensions": [
+      ".ml",
+      ".mli"
+    ],
+    "monaco": "ocaml"
+  },
+  {
+    "id": "swift",
+    "name": "Swift",
+    "extensions": [
+      ".swift"
+    ],
+    "monaco": "swift"
+  },
+  {
+    "id": "ylc",
+    "name": "Ygen",
+    "extensions": [
+      ".yl"
+    ],
+    "monaco": "llvm-ir"
+  },
+  {
+    "id": "zig",
+    "name": "Zig",
+    "extensions": [
+      ".zig"
+    ],
+    "monaco": "zig"
+  }
+]
