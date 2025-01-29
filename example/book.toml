@@ -1,6 +1,6 @@
 [book]
 title = "example"
 
-[preprocessor.remove-emphasis]
+[preprocessor.mdbook-godbolt]
 command = "cargo run --manifest-path=../Cargo.toml --locked"
 

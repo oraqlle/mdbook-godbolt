@@ -97,7 +97,15 @@ mod libgodbolt {
         }
 
         fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> MdBookResult<Book> {
+            let mut result = None;
+
+            // Iterate through each chapter of the book
             book.for_each_mut(|item: &mut BookItem| {
+
+                if let Some(Err(_)) = result {
+                   return; 
+                }
+
                 let BookItem::Chapter(ch) = item else {
                     return;
                 };
@@ -106,16 +114,15 @@ mod libgodbolt {
                     return;
                 }
 
-                match preprocesses(&ch.content) {
-                    Ok(s) => ch.content = s,
-                    Err(e) => eprintln!("Failed to process chapter {e:?}"),
-                }
+                result = Some(preprocesses(&ch.content).map(|md| ch.content = md));
             });
 
-            Ok(book)
+            // If an error occurred return book as is
+            result.unwrap_or(Ok(())).map(|_| book)
         }
     }
 
+    #[derive(Debug)]
     enum InfoParseError {
         NoComma,
         NoGodbolt,
@@ -159,10 +166,9 @@ mod libgodbolt {
 
                 let godbolt_block = match parse_codeblock(
                     info_string.as_ref(),
-                    code_content
-                ) {
-                    Ok(gd) => gd,
-                    Err(_) => return Ok(content.to_string())
+                    code_content) {
+                    Some(block) => block,
+                    None => continue,
                 };
 
                 // Adds HTML data around codeblock content
@@ -189,12 +195,12 @@ mod libgodbolt {
         Ok(new_content)
     }
 
-    fn parse_codeblock<'a>(info_string: &'a str, content: &'a str) -> Result<Godbolt<'a>, InfoParseError> {
+    fn parse_codeblock<'a>(info_string: &'a str, content: &'a str) -> Option<Godbolt<'a>> {
         let body = extract_godbolt_body(dbg!(content));
 
         let info = godbolt_info(dbg!(info_string))?;
 
-        Ok(Godbolt::new(info, body))
+        Some(Godbolt::new(info, body))
     }
 
     fn extract_godbolt_body(content: &str) -> &str {
@@ -228,22 +234,24 @@ mod libgodbolt {
         content.len() - num_fchar
     }
 
-    fn godbolt_info(info_string: &str) -> Result<GodboltMeta, InfoParseError> {
-        let comma_idx = info_string.find(',');
+    fn godbolt_info(info_string: &str) -> Option<GodboltMeta> {
+        info_string
+            .find(',')
+            .map(|comma_idx| {
 
-        match comma_idx {
-            None => Err(InfoParseError::NoComma),
-            Some(idx) => {
-                let godbolt_meta = &info_string[(idx + 1)..];
-
-                if !godbolt_meta.starts_with("godbolt") {
-                    return Err(InfoParseError::NoGodbolt);
+                if comma_idx == 0 {
+                    return None;
                 }
 
-                let lang = &info_string[..(idx - 1)];
+                let godbolt_meta = &info_string[(comma_idx + 1)..];
 
-                Ok(GodboltMeta { lang })
-            }
-        }
+                if !godbolt_meta.starts_with("godbolt") {
+                    return None;
+                }
+
+                let lang = &info_string[..(comma_idx - 1)];
+
+                Some(GodboltMeta { lang })
+            }).flatten()
     }
 }
