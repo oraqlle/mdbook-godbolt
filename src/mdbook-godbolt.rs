@@ -227,7 +227,7 @@ mod libgodbolt {
     fn strip_godbolt_from_codeblock(content: &str, info: &GodboltMeta) -> String {
         let start_idx = body_start_index(content);
 
-        format!("```{}\n{}", dbg!(&info.lang), &content[start_idx..])
+        format!("```{}\n{}", &info.lang, &content[start_idx..])
             .trim_end()
             .to_string()
     }

@@ -2,7 +2,7 @@
 
 Some text
 
-```c++,godbolt
+```cpp,godbolt
 $#include <cmath>
 $#include <iostream>
 $
@@ -25,7 +25,7 @@ $    return 0;
 
 More text
 
-```c++,
+```cpp,
 $#include <cmath>
 $#include <iostream>
 $
@@ -46,7 +46,7 @@ $    return 0;
 }
 ```
 
-```c++
+```cpp
 $#include <cmath>
 $#include <iostream>
 $
