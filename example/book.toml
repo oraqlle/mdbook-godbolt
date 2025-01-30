@@ -4,3 +4,9 @@ title = "example"
 [preprocessor.mdbook-godbolt]
 command = "cargo run --manifest-path=../Cargo.toml --locked"
 
+[output.html.playground]
+editable = true
+
+[output.html.code.hidelines]
+cpp = "$"
+

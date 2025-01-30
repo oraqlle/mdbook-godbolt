@@ -70,7 +70,6 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
 // TODO: Install of custom book.js to handle godbolt based codeblocks
 
 mod libgodbolt {
-    use std::{borrow::Cow, collections::HashMap};
 
     use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag};
 
@@ -122,36 +121,58 @@ mod libgodbolt {
         }
     }
 
-    #[derive(Debug)]
-    enum InfoParseError {
-        NoComma,
-        NoGodbolt,
+    struct GodboltMeta {
+        lang: String
     }
 
-    struct GodboltMeta<'a> {
-        lang: &'a str
+    impl GodboltMeta {
+        fn new(info_string: &str) -> Option<GodboltMeta> {
+            info_string
+                .find(',')
+                .map(|comma_idx| {
+
+                    if comma_idx == 0 {
+                        return None;
+                    }
+
+                    let godbolt_info = &info_string[(comma_idx + 1)..];
+
+                    if !godbolt_info.starts_with("godbolt") {
+                        return None;
+                    }
+
+                    let lang = &info_string[..comma_idx];
+
+                    Some(GodboltMeta { lang: lang.to_string() })
+                }).flatten()
+        }
     }
 
-    struct Godbolt<'a> {
-        meta: GodboltMeta<'a>,
-        body: Cow<'a, str>
+    struct Godbolt {
+        info: GodboltMeta,
+        codeblock: String
     }
 
-    impl<'a> Godbolt<'a> {
-        pub(crate) fn new(info: GodboltMeta<'a>, body: &'a str) -> Self {
+    impl Godbolt {
+        pub(crate) fn new(info: GodboltMeta, codeblock: String) -> Self {
             Self {
-                meta: info,
-                body: Cow::Borrowed(body)
+                info,
+                codeblock
             }
         }
 
-        pub(crate) fn html(self, _id_counter: &mut HashMap<String, usize>) -> String {
-            String::from("html")
+        pub(crate) fn add_godbolt_pre(self) -> String {
+            let html = mdbook::utils::render_markdown(&self.codeblock, false);
+
+            let code_start_idx = html.find("<code").unwrap();
+            let code_end_idx = html.find("</code>").unwrap() + 7;
+            let code_block = &html[code_start_idx..code_end_idx];
+
+            format!("<pre><pre class=\"godbolt\">{}</pre></pre>", code_block)
         }
     }
 
     fn preprocesses(content: &str) -> MdBookResult<String> {
-        let mut id_counter = Default::default();
 
         // Get markdown parsing events as iterator
         let events = Parser::new_ext(content, Options::empty());
@@ -164,16 +185,16 @@ mod libgodbolt {
             {
                 let code_content = &content[span.start..span.end];
 
-                let godbolt_block = match parse_codeblock(
+                let godbolt = match extract_godbolt_info(
                     info_string.as_ref(),
                     code_content) {
-                    Some(block) => block,
+                    Some(gd) => gd,
                     None => continue,
                 };
 
                 // Adds HTML data around codeblock content
                 // TODO: Add HTML <pre> tag with godbolt class
-                let godbolt_content = godbolt_block.html(&mut id_counter);
+                let godbolt_content = godbolt.add_godbolt_pre();
 
                 // Locally store preprocessed blocks
                 godbolt_blocks.push((span, godbolt_content));
@@ -195,20 +216,20 @@ mod libgodbolt {
         Ok(new_content)
     }
 
-    fn parse_codeblock<'a>(info_string: &'a str, content: &'a str) -> Option<Godbolt<'a>> {
-        let body = extract_godbolt_body(dbg!(content));
+    fn extract_godbolt_info(info_string: &str, content: &str) -> Option<Godbolt> {
+        let info = GodboltMeta::new(info_string)?;
 
-        let info = godbolt_info(dbg!(info_string))?;
+        let codeblock = strip_godbolt_from_codeblock(content, &info);
 
-        Some(Godbolt::new(info, body))
+        Some(Godbolt::new(info, codeblock))
     }
 
-    fn extract_godbolt_body(content: &str) -> &str {
+    fn strip_godbolt_from_codeblock(content: &str, info: &GodboltMeta) -> String {
         let start_idx = body_start_index(content);
-        let end_idx = body_end_index(content);
 
-        let body = &content[start_idx..end_idx];
-        body.trim_end()
+        format!("```{}\n{}", dbg!(&info.lang), &content[start_idx..])
+            .trim_end()
+            .to_string()
     }
 
     fn body_start_index(content: &str) -> usize {
@@ -223,6 +244,7 @@ mod libgodbolt {
         }
     }
 
+    #[deprecated]
     fn body_end_index(content: &str) -> usize {
         let fchar = content.chars().next_back().unwrap_or('`');
         let num_fchar = content
@@ -232,26 +254,5 @@ mod libgodbolt {
             .unwrap_or_default();
 
         content.len() - num_fchar
-    }
-
-    fn godbolt_info(info_string: &str) -> Option<GodboltMeta> {
-        info_string
-            .find(',')
-            .map(|comma_idx| {
-
-                if comma_idx == 0 {
-                    return None;
-                }
-
-                let godbolt_meta = &info_string[(comma_idx + 1)..];
-
-                if !godbolt_meta.starts_with("godbolt") {
-                    return None;
-                }
-
-                let lang = &info_string[..(comma_idx - 1)];
-
-                Some(GodboltMeta { lang })
-            }).flatten()
     }
 }
