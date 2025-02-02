@@ -14,8 +14,8 @@ fn make_cli() -> Command {
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
-                .about("Check whether a renderer is supported by the preprocessor"),
-        )
+                .about("Check whether a renderer is supported by the preprocessor"))
+        .subcommand(Command::new("install"))
 }
 
 fn main() {
@@ -25,6 +25,12 @@ fn main() {
 
     if let Some(sub_args) = matches.subcommand_matches("supports") {
         handle_supports(&preprocessor, sub_args);
+    } else if let Some(_) = matches.subcommand_matches("install") {
+        if let Err(e) = install::handle_install() {
+            eprintln!("Error installing mdbook-godbolt: {e}");
+        } else {
+            println!("Installed mdbook-godbolt preprocessor");
+        }
     } else if let Err(e) = handle_preprocessing(&preprocessor) {
         eprintln!("{e}");
         process::exit(1);
@@ -67,10 +73,104 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
     }
 }
 
-// TODO: Install of custom book.js to handle godbolt based codeblocks
+mod install {
+    use std::{fs::{self, File}, io::Write, path::PathBuf};
+
+    use anyhow::{Result, Context};
+    use toml_edit::{DocumentMut, Item, Table};
+
+    const ASSETS_VER: &str = include_str!("../assets/VERSION");
+
+    const GODBOLT_BOOKJS: (&str, &[u8]) = (
+        "book.js",
+        include_bytes!("../assets/book.js"),
+    );
+
+    pub fn handle_install() -> Result<()> {
+        let proj_dir = PathBuf::from(".");
+        let config = proj_dir.join("book.toml");
+        
+        let toml = fs::read_to_string(&config)
+            .with_context(|| format!("can't read configuration file '{}'", config.display()))?;
+
+        let mut doc = toml
+            .parse::<DocumentMut>()
+            .context("configuration is not valid TOML")?;
+
+        // Inject preprocessor config into in-memory TOML config
+        if let Ok(injected_doc) = inject_preprocessor(&mut doc) {
+            let value = toml_edit::value(
+                toml_edit::Value::from(ASSETS_VER.trim())
+                    .decorated(" ", " # do not edit: managed by `mdbook-godbolt install`")
+            );
+
+            injected_doc["assets_version"] = value;
+        } else {
+            eprintln!("Error injecting preprocessor config in `book.toml'");
+        };
+
+        let path = proj_dir.join("theme")
+            .components()
+            .collect::<PathBuf>();
+
+        if !path.exists() {
+            fs::create_dir(&path)?;
+        }
+
+        let filepath = &path.join(GODBOLT_BOOKJS.0);
+        
+        println!(
+            "Copying `{}' to '{}'",
+            GODBOLT_BOOKJS.0,
+            filepath.display()
+        );
+
+        let mut file = File::create(&filepath).context("can't open file for writing")?;
+        file.write_all(GODBOLT_BOOKJS.1)
+            .context("can't write content to file")?;
+
+        // Create new TOML config and write to disk
+        let new_toml = doc.to_string();
+
+        if new_toml != toml {
+            println!("Saving changed configuration to `{}'", config.display());
+
+            let mut file = File::create(config)
+                .context("can't open configuration file for writing.")?;
+
+            file.write_all(new_toml.as_bytes()).context("can't write configuration")?;
+        } else {
+            eprintln!("Configuration `{}' already up to date", config.display());
+        }
+
+        Ok(())
+    }
+
+    fn inject_preprocessor(doc: &mut DocumentMut) -> Result<&mut Item, ()> {
+        let doc = doc.as_table_mut();
+
+        let pre_table = doc
+            .entry("preprocessor")
+            .or_insert(Item::Table(Table::default()));
+
+        pre_table
+            .as_table_mut()
+            .ok_or(())?
+            .set_dotted(true);
+
+        let gd_table = pre_table
+            .as_table_mut()
+            .ok_or(())?
+            .entry("godbolt")
+            .or_insert(Item::Table(Table::default()));
+
+        gd_table["command"] = toml_edit::value("mdbook-godbolt");
+
+        Ok(pre_table)
+    }
+}
 
 mod libgodbolt {
-
     use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag};
 
     use super::*;

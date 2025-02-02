@@ -21,8 +21,7 @@ anyhow = "1.0.95"
 clap = { version = "4.5.26", features = ["derive"] }
 mdbook = "0.4.40"
 pulldown-cmark = "0.12.2"
-pulldown-cmark-to-cmark = "18.0.0"
-semver = "1.0.24"
-serde = { version = "1.0.203", features = ["derive"] }
+semver = "1.0.25"
 serde_json = "1.0.117"
+toml_edit = "0.22.23"
 
