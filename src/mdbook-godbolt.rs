@@ -98,14 +98,7 @@ mod install {
             .context("configuration is not valid TOML")?;
 
         // Inject preprocessor config into in-memory TOML config
-        if let Ok(injected_doc) = inject_preprocessor(&mut doc) {
-            let value = toml_edit::value(
-                toml_edit::Value::from(ASSETS_VER.trim())
-                    .decorated(" ", " # do not edit: managed by `mdbook-godbolt install`")
-            );
-
-            injected_doc["assets_version"] = value;
-        } else {
+        if let Err(_) = inject_preprocessor(&mut doc) {
             eprintln!("Error injecting preprocessor config in `book.toml'");
         };
 
@@ -146,27 +139,29 @@ mod install {
         Ok(())
     }
 
-    fn inject_preprocessor(doc: &mut DocumentMut) -> Result<&mut Item, ()> {
+    fn inject_preprocessor(doc: &mut DocumentMut) -> Result<(), ()> {
         let doc = doc.as_table_mut();
 
         let pre_table = doc
             .entry("preprocessor")
-            .or_insert(Item::Table(Table::default()));
-
-        pre_table
+            .or_insert(Item::Table(Table::default()))
             .as_table_mut()
-            .ok_or(())?
-            .set_dotted(true);
+            .ok_or(())?;
+
+        pre_table.set_dotted(true);
 
         let gd_table = pre_table
-            .as_table_mut()
-            .ok_or(())?
             .entry("godbolt")
             .or_insert(Item::Table(Table::default()));
 
         gd_table["command"] = toml_edit::value("mdbook-godbolt");
 
-        Ok(pre_table)
+        gd_table["assets_version"] = toml_edit::value(
+            toml_edit::Value::from(ASSETS_VER.trim())
+                .decorated(" ", " # do not edit: managed by `mdbook-godbolt install`")
+        );
+
+        Ok(())
     }
 }
 
@@ -213,7 +208,7 @@ mod libgodbolt {
                     return;
                 }
 
-                result = Some(preprocesses(&ch.content).map(|md| ch.content = md));
+                result = Some(preprocess(&ch.content).map(|md| ch.content = md));
             });
 
             // If an error occurred return book as is
@@ -272,7 +267,7 @@ mod libgodbolt {
         }
     }
 
-    fn preprocesses(content: &str) -> MdBookResult<String> {
+    fn preprocess(content: &str) -> MdBookResult<String> {
 
         // Get markdown parsing events as iterator
         let events = Parser::new_ext(content, Options::empty());
@@ -342,17 +337,5 @@ mod libgodbolt {
             // Check for out of bounds indexes
             Some(idx) => if idx > (content.len() - 1) { 0 } else { idx }
         }
-    }
-
-    #[deprecated]
-    fn body_end_index(content: &str) -> usize {
-        let fchar = content.chars().next_back().unwrap_or('`');
-        let num_fchar = content
-            .chars()
-            .rev()
-            .position(|c| c != fchar)
-            .unwrap_or_default();
-
-        content.len() - num_fchar
     }
 }

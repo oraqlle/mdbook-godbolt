@@ -1,13 +1,13 @@
-preprocessor.assets_version = "0.1.0" # do not edit: managed by `mdbook-godbolt install`
 [book]
 title = "example"
-
-[output.html]
-additional-css = ["./mdbook-admonish.css"]
 
 [output.html.playground]
 editable = true
 
 [output.html.code.hidelines]
 cpp = "$"
+
+[preprocessor.godbolt]
+command = "mdbook-godbolt"
+assets_version = "0.1.0" # do not edit: managed by `mdbook-godbolt install`
 
