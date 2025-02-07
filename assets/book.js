@@ -1,7 +1,7 @@
 "use strict";
 
 // Fix back button cache problem
-window.onunload = function () { };
+window.onunload = function() { };
 
 // Global variable, shared between modules
 function playground_text(playground, hidden = true) {
@@ -16,10 +16,6 @@ function playground_text(playground, hidden = true) {
         return code_block.innerText;
     }
 }
-
-(function godboltCodeblocks() {
-    console.log("cool stuff")
-})();
 
 (function codeSnippets() {
     function fetch_with_timeout(url, options, timeout = 6000) {
@@ -38,12 +34,12 @@ function playground_text(playground, hidden = true) {
             method: 'POST',
             mode: 'cors',
         })
-        .then(response => response.json())
-        .then(response => {
-            // get list of crates available in the rust playground
-            let playground_crates = response.crates.map(item => item["id"]);
-            playgrounds.forEach(block => handle_crate_list_update(block, playground_crates));
-        });
+            .then(response => response.json())
+            .then(response => {
+                // get list of crates available in the rust playground
+                let playground_crates = response.crates.map(item => item["id"]);
+                playgrounds.forEach(block => handle_crate_list_update(block, playground_crates));
+            });
     }
 
     function handle_crate_list_update(playground_block, playground_crates) {
@@ -55,7 +51,7 @@ function playground_text(playground, hidden = true) {
             let code_block = playground_block.querySelector("code");
             if (code_block.classList.contains("editable")) {
                 let editor = window.ace.edit(code_block);
-                editor.addEventListener("change", function (e) {
+                editor.addEventListener("change", function(e) {
                     update_play_button(playground_block, playground_crates);
                 });
                 // add Ctrl-Enter command to execute rust code
@@ -92,7 +88,7 @@ function playground_text(playground, hidden = true) {
         }
 
         // check if all used crates are available on play.rust-lang.org
-        var all_available = snippet_crates.every(function (elem) {
+        var all_available = snippet_crates.every(function(elem) {
             return playground_crates.indexOf(elem) > -1;
         });
 
@@ -115,9 +111,9 @@ function playground_text(playground, hidden = true) {
         let text = playground_text(code_block);
         let classes = code_block.querySelector('code').classList;
         let edition = "2015";
-        if(classes.contains("edition2018")) {
+        if (classes.contains("edition2018")) {
             edition = "2018";
-        } else if(classes.contains("edition2021")) {
+        } else if (classes.contains("edition2021")) {
             edition = "2021";
         }
         var params = {
@@ -141,17 +137,17 @@ function playground_text(playground, hidden = true) {
             mode: 'cors',
             body: JSON.stringify(params)
         })
-        .then(response => response.json())
-        .then(response => {
-            if (response.result.trim() === '') {
-                result_block.innerText = "No output";
-                result_block.classList.add("result-no-output");
-            } else {
-                result_block.innerText = response.result;
-                result_block.classList.remove("result-no-output");
-            }
-        })
-        .catch(error => result_block.innerText = "Playground Communication: " + error.message);
+            .then(response => response.json())
+            .then(response => {
+                if (response.result.trim() === '') {
+                    result_block.innerText = "No output";
+                    result_block.classList.add("result-no-output");
+                } else {
+                    result_block.innerText = response.result;
+                    result_block.classList.remove("result-no-output");
+                }
+            })
+            .catch(error => result_block.innerText = "Playground Communication: " + error.message);
     }
 
     // Syntax highlighting Configuration
@@ -163,27 +159,27 @@ function playground_text(playground, hidden = true) {
     let code_nodes = Array
         .from(document.querySelectorAll('code'))
         // Don't highlight `inline code` blocks in headers.
-        .filter(function (node) {return !node.parentElement.classList.contains("header"); });
+        .filter(function(node) { return !node.parentElement.classList.contains("header"); });
 
     if (window.ace) {
         // language-rust class needs to be removed for editable
         // blocks or highlightjs will capture events
         code_nodes
-            .filter(function (node) {return node.classList.contains("editable"); })
-            .forEach(function (block) { block.classList.remove('language-rust'); });
+            .filter(function(node) { return node.classList.contains("editable"); })
+            .forEach(function(block) { block.classList.remove('language-rust'); });
 
         code_nodes
-            .filter(function (node) {return !node.classList.contains("editable"); })
-            .forEach(function (block) { hljs.highlightBlock(block); });
+            .filter(function(node) { return !node.classList.contains("editable"); })
+            .forEach(function(block) { hljs.highlightBlock(block); });
     } else {
-        code_nodes.forEach(function (block) { hljs.highlightBlock(block); });
+        code_nodes.forEach(function(block) { hljs.highlightBlock(block); });
     }
 
     // Adding the hljs class gives code blocks the color css
     // even if highlighting doesn't apply
-    code_nodes.forEach(function (block) { block.classList.add('hljs'); });
+    code_nodes.forEach(function(block) { block.classList.add('hljs'); });
 
-    Array.from(document.querySelectorAll("code.hljs")).forEach(function (block) {
+    Array.from(document.querySelectorAll("code.hljs")).forEach(function(block) {
 
         var lines = Array.from(block.querySelectorAll('.boring'));
         // If no lines were hidden, return
@@ -198,7 +194,7 @@ function playground_text(playground, hidden = true) {
         var pre_block = block.parentNode;
         pre_block.insertBefore(buttons, pre_block.firstChild);
 
-        pre_block.querySelector('.buttons').addEventListener('click', function (e) {
+        pre_block.querySelector('.buttons').addEventListener('click', function(e) {
             if (e.target.classList.contains('fa-eye')) {
                 e.target.classList.remove('fa-eye');
                 e.target.classList.add('fa-eye-slash');
@@ -218,7 +214,7 @@ function playground_text(playground, hidden = true) {
     });
 
     if (window.playground_copyable) {
-        Array.from(document.querySelectorAll('pre code')).forEach(function (block) {
+        Array.from(document.querySelectorAll('pre code')).forEach(function(block) {
             var pre_block = block.parentNode;
             if (!pre_block.classList.contains('playground')) {
                 var buttons = pre_block.querySelector(".buttons");
@@ -240,7 +236,7 @@ function playground_text(playground, hidden = true) {
     }
 
     // Process playground code blocks
-    Array.from(document.querySelectorAll(".playground")).forEach(function (pre_block) {
+    Array.from(document.querySelectorAll(".playground")).forEach(function(pre_block) {
         // Add play button
         var buttons = pre_block.querySelector(".buttons");
         if (!buttons) {
@@ -256,7 +252,7 @@ function playground_text(playground, hidden = true) {
         runCodeButton.setAttribute('aria-label', runCodeButton.title);
 
         buttons.insertBefore(runCodeButton, buttons.firstChild);
-        runCodeButton.addEventListener('click', function (e) {
+        runCodeButton.addEventListener('click', function(e) {
             run_rust_code(pre_block);
         });
 
@@ -279,12 +275,99 @@ function playground_text(playground, hidden = true) {
 
             buttons.insertBefore(undoChangesButton, buttons.firstChild);
 
-            undoChangesButton.addEventListener('click', function () {
+            undoChangesButton.addEventListener('click', function() {
                 let editor = window.ace.edit(code_block);
                 editor.setValue(editor.originalCode);
                 editor.clearSelection();
             });
         }
+    });
+})();
+
+// Current issue is that two `button' <div> are made for codeblocks.
+// Need to find a way to combine them.
+(function godboltCodeblocks() {
+    function fetch_with_timeout(url, options, timeout = 6000) {
+        return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
+        ]);
+    }
+
+    function run_code(code_block) {
+        var result_block = code_block.querySelector(".result");
+        if (!result_block) {
+            result_block = document.createElement('code');
+            result_block.className = 'result hljs language-bash';
+
+            code_block.append(result_block);
+        }
+
+        let text = playground_text(code_block);
+
+        var params = {
+            "source": text,
+            "compiler": "g141",
+            "options": {
+                "userArguments": "-O3",
+                "compilerOptions": {
+                    "executorRequest": true
+                },
+                "filters": {
+                    "execute": true
+                },
+                "tools": [],
+                "libraries": [],
+            },
+            "lang": "c++",
+            "allowStoreCodeDebug": true
+        };
+
+        result_block.innerText = "Running...";
+
+        fetch_with_timeout("https://godbolt.org/api/compiler/g141/compile", {
+            headers: {
+                'Content-Type': "application/json",
+            },
+            method: 'POST',
+            body: JSON.stringify(params)
+        })
+            .then(response => response.json())
+            .then(response => {
+                if (response.result.trim() === '') {
+                    result_block.innerText = "No output";
+                    result_block.classList.add("result-no-output");
+                } else {
+                    result_block.innerText = response.result;
+                    result_block.classList.remove("result-no-output");
+                }
+            })
+            .catch(error => result_block.innerText = "Godbolt Communication: " + error.message);
+    }
+
+    // Process godbolt code blocks
+    Array.from(document.querySelectorAll(".godbolt")).forEach(function(pre_block) {
+        // Add play button
+        var buttons = pre_block.querySelector(".buttons");
+        if (!buttons) {
+            buttons = document.createElement('div');
+            buttons.className = 'buttons';
+            pre_block.insertBefore(buttons, pre_block.firstChild);
+        } else {
+
+        }
+
+        var runCodeButton = document.createElement('button');
+        runCodeButton.className = 'fa fa-play play-button';
+        runCodeButton.hidden = true;
+        runCodeButton.title = 'Run this code';
+        runCodeButton.setAttribute('aria-label', runCodeButton.title);
+
+        buttons.insertBefore(runCodeButton, buttons.firstChild);
+
+        runCodeButton.addEventListener('click', function(e) {
+            run_code(pre_block);
+        });
     });
 })();
 
@@ -294,7 +377,7 @@ function playground_text(playground, hidden = true) {
     var themePopup = document.getElementById('theme-list');
     var themeColorMetaTag = document.querySelector('meta[name="theme-color"]');
     var themeIds = [];
-    themePopup.querySelectorAll('button.theme').forEach(function (el) {
+    themePopup.querySelectorAll('button.theme').forEach(function(el) {
         themeIds.push(el.id);
     });
     var stylesheets = {
@@ -310,7 +393,7 @@ function playground_text(playground, hidden = true) {
     }
 
     function updateThemeSelected() {
-        themePopup.querySelectorAll('.theme-selected').forEach(function (el) {
+        themePopup.querySelectorAll('.theme-selected').forEach(function(el) {
             el.classList.remove('theme-selected');
         });
         themePopup.querySelector("button#" + get_theme()).classList.add('theme-selected');
@@ -353,12 +436,12 @@ function playground_text(playground, hidden = true) {
             ace_theme = "ace/theme/dawn";
         }
 
-        setTimeout(function () {
+        setTimeout(function() {
             themeColorMetaTag.content = getComputedStyle(document.documentElement).backgroundColor;
         }, 1);
 
         if (window.ace && window.editors) {
-            window.editors.forEach(function (editor) {
+            window.editors.forEach(function(editor) {
                 editor.setTheme(ace_theme);
             });
         }
@@ -379,7 +462,7 @@ function playground_text(playground, hidden = true) {
 
     set_theme(theme, false);
 
-    themeToggleButton.addEventListener('click', function () {
+    themeToggleButton.addEventListener('click', function() {
         if (themePopup.style.display === 'block') {
             hideThemes();
         } else {
@@ -387,7 +470,7 @@ function playground_text(playground, hidden = true) {
         }
     });
 
-    themePopup.addEventListener('click', function (e) {
+    themePopup.addEventListener('click', function(e) {
         var theme;
         if (e.target.className === "theme") {
             theme = e.target.id;
@@ -413,7 +496,7 @@ function playground_text(playground, hidden = true) {
         }
     });
 
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', function(e) {
         if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return; }
         if (!themePopup.contains(e.target)) { return; }
 
@@ -460,7 +543,7 @@ function playground_text(playground, hidden = true) {
     function showSidebar() {
         body.classList.remove('sidebar-hidden')
         body.classList.add('sidebar-visible');
-        Array.from(sidebarLinks).forEach(function (link) {
+        Array.from(sidebarLinks).forEach(function(link) {
             link.setAttribute('tabIndex', 0);
         });
         sidebarToggleButton.setAttribute('aria-expanded', true);
@@ -471,7 +554,7 @@ function playground_text(playground, hidden = true) {
     function hideSidebar() {
         body.classList.remove('sidebar-visible')
         body.classList.add('sidebar-hidden');
-        Array.from(sidebarLinks).forEach(function (link) {
+        Array.from(sidebarLinks).forEach(function(link) {
             link.setAttribute('tabIndex', -1);
         });
         sidebarToggleButton.setAttribute('aria-expanded', false);
@@ -519,14 +602,14 @@ function playground_text(playground, hidden = true) {
         window.removeEventListener('mouseup', stopResize, false);
     }
 
-    document.addEventListener('touchstart', function (e) {
+    document.addEventListener('touchstart', function(e) {
         firstContact = {
             x: e.touches[0].clientX,
             time: Date.now()
         };
     }, { passive: true });
 
-    document.addEventListener('touchmove', function (e) {
+    document.addEventListener('touchmove', function(e) {
         if (!firstContact)
             return;
 
@@ -546,7 +629,7 @@ function playground_text(playground, hidden = true) {
 })();
 
 (function chapterNavigation() {
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', function(e) {
         if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return; }
         if (window.search && window.search.hasFocus()) { return; }
         var html = document.querySelector('html');
@@ -598,33 +681,33 @@ function playground_text(playground, hidden = true) {
     }
 
     var clipboardSnippets = new ClipboardJS('.clip-button', {
-        text: function (trigger) {
+        text: function(trigger) {
             hideTooltip(trigger);
             let playground = trigger.closest("pre");
             return playground_text(playground, false);
         }
     });
 
-    Array.from(clipButtons).forEach(function (clipButton) {
-        clipButton.addEventListener('mouseout', function (e) {
+    Array.from(clipButtons).forEach(function(clipButton) {
+        clipButton.addEventListener('mouseout', function(e) {
             hideTooltip(e.currentTarget);
         });
     });
 
-    clipboardSnippets.on('success', function (e) {
+    clipboardSnippets.on('success', function(e) {
         e.clearSelection();
         showTooltip(e.trigger, "Copied!");
     });
 
-    clipboardSnippets.on('error', function (e) {
+    clipboardSnippets.on('error', function(e) {
         showTooltip(e.trigger, "Clipboard error!");
     });
 })();
 
-(function scrollToTop () {
+(function scrollToTop() {
     var menuTitle = document.querySelector('.menu-title');
 
-    menuTitle.addEventListener('click', function () {
+    menuTitle.addEventListener('click', function() {
         document.scrollingElement.scrollTo({ top: 0, behavior: 'smooth' });
     });
 })();
@@ -642,7 +725,7 @@ function playground_text(playground, hidden = true) {
         var topCache = menu.style.top.slice(0, -2);
         menu.classList.remove('sticky');
         var stickyCache = false; // Same as menu.classList.contains('sticky'), but faster
-        document.addEventListener('scroll', function () {
+        document.addEventListener('scroll', function() {
             scrollTop = Math.max(document.scrollingElement.scrollTop, 0);
             // `null` means that it doesn't need to be updated
             var nextSticky = null;
