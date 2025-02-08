@@ -284,8 +284,6 @@ function playground_text(playground, hidden = true) {
     });
 })();
 
-// Current issue is that two `button' <div> are made for codeblocks.
-// Need to find a way to combine them.
 (function godboltCodeblocks() {
     function fetch_with_timeout(url, options, timeout = 6000) {
         return Promise.race([
@@ -353,8 +351,6 @@ function playground_text(playground, hidden = true) {
             buttons = document.createElement('div');
             buttons.className = 'buttons';
             pre_block.insertBefore(buttons, pre_block.firstChild);
-        } else {
-
         }
 
         var runCodeButton = document.createElement('button');

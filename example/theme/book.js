@@ -17,88 +17,6 @@ function playground_text(playground, hidden = true) {
     }
 }
 
-(function godboltCodeblocks() {
-    function fetch_with_timeout(url, options, timeout = 6000) {
-        return Promise.race([
-            fetch(url, options),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
-        ]);
-    }
-
-    function run_code(code_block) {
-        var result_block = code_block.querySelector(".result");
-        if (!result_block) {
-            result_block = document.createElement('code');
-            result_block.className = 'result hljs language-bash';
-
-            code_block.append(result_block);
-        }
-
-        let text = playground_text(code_block);
-
-        var params = {
-            "source": text,
-            "compiler": "g141",
-            "options": {
-                "userArguments": "-O3",
-                "compilerOptions": {
-                    "executorRequest": true
-                },
-                "filters": {
-                    "execute": true
-                },
-                "tools": [],
-                "libraries": [],
-            },
-            "lang": "c++",
-            "allowStoreCodeDebug": true
-        };
-
-        result_block.innerText = "Running...";
-
-        fetch_with_timeout("https://godbolt.org/api/compiler/g141/compile", {
-            headers: {
-                'Content-Type': "application/json",
-            },
-            method: 'POST',
-            body: JSON.stringify(params)
-        })
-            .then(response => response.json())
-            .then(response => {
-                if (response.result.trim() === '') {
-                    result_block.innerText = "No output";
-                    result_block.classList.add("result-no-output");
-                } else {
-                    result_block.innerText = response.result;
-                    result_block.classList.remove("result-no-output");
-                }
-            })
-            .catch(error => result_block.innerText = "Godbolt Communication: " + error.message);
-    }
-
-    // Process godbolt code blocks
-    Array.from(document.querySelectorAll(".godbolt")).forEach(function(pre_block) {
-        // Add play button
-        var buttons = pre_block.querySelector(".buttons");
-        if (!buttons) {
-            buttons = document.createElement('div');
-            buttons.className = 'buttons';
-            pre_block.insertBefore(buttons, pre_block.firstChild);
-        }
-
-        var runCodeButton = document.createElement('button');
-        runCodeButton.className = 'fa fa-play play-button';
-        runCodeButton.hidden = true;
-        runCodeButton.title = 'Run this code';
-        runCodeButton.setAttribute('aria-label', runCodeButton.title);
-
-        buttons.insertBefore(runCodeButton, buttons.firstChild);
-        runCodeButton.addEventListener('click', function(e) {
-            run_code(pre_block);
-        });
-    });
-})();
-
 (function codeSnippets() {
     function fetch_with_timeout(url, options, timeout = 6000) {
         return Promise.race([
@@ -363,6 +281,93 @@ function playground_text(playground, hidden = true) {
                 editor.clearSelection();
             });
         }
+    });
+})();
+
+// Current issue is that two `button' <div> are made for codeblocks.
+// Need to find a way to combine them.
+(function godboltCodeblocks() {
+    function fetch_with_timeout(url, options, timeout = 6000) {
+        return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
+        ]);
+    }
+
+    function run_code(code_block) {
+        var result_block = code_block.querySelector(".result");
+        if (!result_block) {
+            result_block = document.createElement('code');
+            result_block.className = 'result hljs language-bash';
+
+            code_block.append(result_block);
+        }
+
+        let text = playground_text(code_block);
+
+        var params = {
+            "source": text,
+            "compiler": "g141",
+            "options": {
+                "userArguments": "-O3",
+                "compilerOptions": {
+                    "executorRequest": true
+                },
+                "filters": {
+                    "execute": true
+                },
+                "tools": [],
+                "libraries": [],
+            },
+            "lang": "c++",
+            "allowStoreCodeDebug": true
+        };
+
+        result_block.innerText = "Running...";
+
+        fetch_with_timeout("https://godbolt.org/api/compiler/g141/compile", {
+            headers: {
+                'Content-Type': "application/json",
+            },
+            method: 'POST',
+            body: JSON.stringify(params)
+        })
+            .then(response => response.json())
+            .then(response => {
+                if (response.result.trim() === '') {
+                    result_block.innerText = "No output";
+                    result_block.classList.add("result-no-output");
+                } else {
+                    result_block.innerText = response.result;
+                    result_block.classList.remove("result-no-output");
+                }
+            })
+            .catch(error => result_block.innerText = "Godbolt Communication: " + error.message);
+    }
+
+    // Process godbolt code blocks
+    Array.from(document.querySelectorAll(".godbolt")).forEach(function(pre_block) {
+        // Add play button
+        var buttons = pre_block.querySelector(".buttons");
+        if (!buttons) {
+            buttons = document.createElement('div');
+            buttons.className = 'buttons';
+            pre_block.insertBefore(buttons, pre_block.firstChild);
+        } else {
+
+        }
+
+        var runCodeButton = document.createElement('button');
+        runCodeButton.className = 'fa fa-play play-button';
+        runCodeButton.hidden = true;
+        runCodeButton.title = 'Run this code';
+        runCodeButton.setAttribute('aria-label', runCodeButton.title);
+
+        buttons.insertBefore(runCodeButton, buttons.firstChild);
+
+        runCodeButton.addEventListener('click', function(e) {
+            run_code(pre_block);
+        });
     });
 })();
 
