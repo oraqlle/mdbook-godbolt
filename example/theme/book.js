@@ -225,7 +225,7 @@ function playground_text(playground, hidden = true) {
                 }
 
                 var clipButton = document.createElement('button');
-                clipButton.className = 'clip-button';
+                clipButton.className = 'fa fa-copy clip-button';
                 clipButton.title = 'Copy to clipboard';
                 clipButton.setAttribute('aria-label', clipButton.title);
                 clipButton.innerHTML = '<i class=\"tooltiptext\"></i>';
@@ -353,8 +353,6 @@ function playground_text(playground, hidden = true) {
             buttons = document.createElement('div');
             buttons.className = 'buttons';
             pre_block.insertBefore(buttons, pre_block.firstChild);
-        } else {
-
         }
 
         var runCodeButton = document.createElement('button');
@@ -672,7 +670,7 @@ function playground_text(playground, hidden = true) {
 
     function hideTooltip(elem) {
         elem.firstChild.innerText = "";
-        elem.className = 'clip-button';
+        elem.className = 'fa fa-copy clip-button';
     }
 
     function showTooltip(elem, msg) {
