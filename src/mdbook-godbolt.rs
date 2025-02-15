@@ -262,6 +262,7 @@ mod libgodbolt {
             let code_start_idx = html.find("<code").unwrap();
             let code_end_idx = html.find("</code>").unwrap() + 7;
             let code_block = &html[code_start_idx..code_end_idx];
+            dbg!(code_block);
 
             format!("<pre><pre class=\"godbolt\">{}</pre></pre>", code_block)
         }

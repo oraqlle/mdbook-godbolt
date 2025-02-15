@@ -302,6 +302,7 @@ function playground_text(playground, hidden = true) {
         }
 
         let text = playground_text(code_block);
+        console.log(text);
 
         var params = {
             "source": text,
@@ -325,6 +326,7 @@ function playground_text(playground, hidden = true) {
 
         fetch_with_timeout("https://godbolt.org/api/compiler/g141/compile", {
             headers: {
+                'ACCEPT': "application/json",
                 'Content-Type': "application/json",
             },
             method: 'POST',
@@ -332,15 +334,29 @@ function playground_text(playground, hidden = true) {
         })
             .then(response => response.json())
             .then(response => {
-                if (response.result.trim() === '') {
-                    result_block.innerText = "No output";
-                    result_block.classList.add("result-no-output");
-                } else {
-                    result_block.innerText = response.result;
+                if (response.code != 0) {
+                    result_block.innerText = response
+                        .buildResult
+                        .stderr
+                        .map(x => x.text)
+                        .join("\n");
+
                     result_block.classList.remove("result-no-output");
+                } else {
+
+                    if (response.stdout.length === 0) {
+                        result_block.innerText = "No output";
+                        result_block.classList.add("result-no-output");
+                    } else {
+                        result_block.innerText = response
+                            .stdout
+                            .map(x => x.text)
+                            .join("\n");
+                        result_block.classList.remove("result-no-output");
+                    }
                 }
             })
-            .catch(error => result_block.innerText = "Godbolt Communication: " + error.message);
+            .catch(error => console.log("Godbolt Communication: " + error.message));
     }
 
     // Process godbolt code blocks
