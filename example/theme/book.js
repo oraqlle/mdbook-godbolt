@@ -216,7 +216,7 @@ function playground_text(playground, hidden = true) {
     if (window.playground_copyable) {
         Array.from(document.querySelectorAll('pre code')).forEach(function(block) {
             var pre_block = block.parentNode;
-            if (!pre_block.classList.contains('playground')) {
+            if (!(pre_block.classList.contains('playground') || pre_block.classList.contains('godbolt'))) {
                 var buttons = pre_block.querySelector(".buttons");
                 if (!buttons) {
                     buttons = document.createElement('div');
@@ -236,7 +236,9 @@ function playground_text(playground, hidden = true) {
     }
 
     // Process playground code blocks
-    Array.from(document.querySelectorAll(".playground")).forEach(function(pre_block) {
+    Array.from(document.querySelectorAll(".playground"))
+        .filter((pre_block) => !pre_block.parentElement.classList.contains('godbolt'))
+        .forEach(function(pre_block) {
         // Add play button
         var buttons = pre_block.querySelector(".buttons");
         if (!buttons) {
@@ -258,7 +260,7 @@ function playground_text(playground, hidden = true) {
 
         if (window.playground_copyable) {
             var copyCodeClipboardButton = document.createElement('button');
-            copyCodeClipboardButton.className = 'clip-button';
+            copyCodeClipboardButton.className = 'fa fa-copy clip-button';
             copyCodeClipboardButton.innerHTML = '<i class="tooltiptext"></i>';
             copyCodeClipboardButton.title = 'Copy to clipboard';
             copyCodeClipboardButton.setAttribute('aria-label', copyCodeClipboardButton.title);
@@ -376,10 +378,19 @@ function playground_text(playground, hidden = true) {
         runCodeButton.setAttribute('aria-label', runCodeButton.title);
 
         buttons.insertBefore(runCodeButton, buttons.firstChild);
-
         runCodeButton.addEventListener('click', function(e) {
             run_code(pre_block);
         });
+
+        if (window.playground_copyable) {
+            var copyCodeClipboardButton = document.createElement('button');
+            copyCodeClipboardButton.className = 'fa fa-copy clip-button';
+            copyCodeClipboardButton.innerHTML = '<i class="tooltiptext"></i>';
+            copyCodeClipboardButton.title = 'Copy to clipboard';
+            copyCodeClipboardButton.setAttribute('aria-label', copyCodeClipboardButton.title);
+
+            buttons.insertBefore(copyCodeClipboardButton, buttons.firstChild);
+        }
     });
 })();
 
@@ -684,12 +695,12 @@ function playground_text(playground, hidden = true) {
 
     function hideTooltip(elem) {
         elem.firstChild.innerText = "";
-        elem.className = 'clip-button';
+        elem.className = 'fa fa-copy clip-button';
     }
 
     function showTooltip(elem, msg) {
         elem.firstChild.innerText = msg;
-        elem.className = 'clip-button tooltipped';
+        elem.className = 'fa fa-copy clip-button tooltipped';
     }
 
     var clipboardSnippets = new ClipboardJS('.clip-button', {

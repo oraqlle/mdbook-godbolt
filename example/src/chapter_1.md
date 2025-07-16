@@ -109,3 +109,7 @@ $    return 0;
 }
 ```
 
+```rust
+println!("Hi");
+```
+
