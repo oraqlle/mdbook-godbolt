@@ -14,7 +14,8 @@ fn make_cli() -> Command {
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
-                .about("Check whether a renderer is supported by the preprocessor"))
+                .about("Check whether a renderer is supported by the preprocessor"),
+        )
         .subcommand(Command::new("install"))
 }
 
@@ -74,22 +75,23 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
 }
 
 mod install {
-    use std::{fs::{self, File}, io::Write, path::PathBuf};
+    use std::{
+        fs::{self, File},
+        io::Write,
+        path::PathBuf,
+    };
 
-    use anyhow::{Result, Context};
+    use anyhow::{Context, Result};
     use toml_edit::{DocumentMut, Item, Table};
 
     const ASSETS_VER: &str = include_str!("../assets/VERSION");
 
-    const GODBOLT_BOOKJS: (&str, &[u8]) = (
-        "book.js",
-        include_bytes!("../assets/book.js"),
-    );
+    const GODBOLT_BOOKJS: (&str, &[u8]) = ("book.js", include_bytes!("../assets/book.js"));
 
     pub fn handle_install() -> Result<()> {
         let proj_dir = PathBuf::from(".");
         let config = proj_dir.join("book.toml");
-        
+
         let toml = fs::read_to_string(&config)
             .with_context(|| format!("can't read configuration file '{}'", config.display()))?;
 
@@ -102,21 +104,15 @@ mod install {
             eprintln!("Error injecting preprocessor config in `book.toml'");
         };
 
-        let path = proj_dir.join("theme")
-            .components()
-            .collect::<PathBuf>();
+        let path = proj_dir.join("theme").components().collect::<PathBuf>();
 
         if !path.exists() {
             fs::create_dir(&path)?;
         }
 
         let filepath = &path.join(GODBOLT_BOOKJS.0);
-        
-        println!(
-            "Copying `{}' to '{}'",
-            GODBOLT_BOOKJS.0,
-            filepath.display()
-        );
+
+        println!("Copying `{}' to '{}'", GODBOLT_BOOKJS.0, filepath.display());
 
         let mut file = File::create(&filepath).context("can't open file for writing")?;
         file.write_all(GODBOLT_BOOKJS.1)
@@ -128,10 +124,11 @@ mod install {
         if new_toml != toml {
             println!("Saving changed configuration to `{}'", config.display());
 
-            let mut file = File::create(config)
-                .context("can't open configuration file for writing.")?;
+            let mut file =
+                File::create(config).context("can't open configuration file for writing.")?;
 
-            file.write_all(new_toml.as_bytes()).context("can't write configuration")?;
+            file.write_all(new_toml.as_bytes())
+                .context("can't write configuration")?;
         } else {
             eprintln!("Configuration `{}' already up to date", config.display());
         }
@@ -158,7 +155,7 @@ mod install {
 
         gd_table["assets_version"] = toml_edit::value(
             toml_edit::Value::from(ASSETS_VER.trim())
-                .decorated(" ", " # do not edit: managed by `mdbook-godbolt install`")
+                .decorated(" ", " # do not edit: managed by `mdbook-godbolt install`"),
         );
 
         Ok(())
@@ -166,6 +163,8 @@ mod install {
 }
 
 mod libgodbolt {
+    use std::collections::HashMap;
+
     use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag};
 
     use super::*;
@@ -195,9 +194,8 @@ mod libgodbolt {
 
             // Iterate through each chapter of the book
             book.for_each_mut(|item: &mut BookItem| {
-
                 if let Some(Err(_)) = result {
-                   return; 
+                    return;
                 }
 
                 let BookItem::Chapter(ch) = item else {
@@ -216,44 +214,52 @@ mod libgodbolt {
         }
     }
 
-    struct GodboltMeta {
-        lang: String
-    }
-
-    impl GodboltMeta {
-        fn new(info_string: &str) -> Option<GodboltMeta> {
-            info_string
-                .find(',')
-                .map(|comma_idx| {
-
-                    if comma_idx == 0 {
-                        return None;
-                    }
-
-                    let godbolt_info = &info_string[(comma_idx + 1)..];
-
-                    if !godbolt_info.starts_with("godbolt") {
-                        return None;
-                    }
-
-                    let lang = &info_string[..comma_idx];
-
-                    Some(GodboltMeta { lang: lang.to_string() })
-                }).flatten()
+    fn parse_info_str(info_string: &str) -> Option<HashMap<&str, &str>> {
+        if info_string.contains("godbolt") {
+            Some(
+                info_string
+                    .split(',')
+                    .filter_map(|chunk| {
+                        if chunk.starts_with("godbolt-compiler:") {
+                            Some(("compiler", &chunk[17..]))
+                        } else if chunk.starts_with("godbolt-flags:") {
+                            Some(("flags", &chunk[14..]))
+                        } else if chunk.starts_with("godbolt") {
+                            None
+                        } else {
+                            Some(("lang", chunk))
+                        }
+                    })
+                    .collect(),
+            )
+        } else {
+            None
         }
     }
 
-    struct Godbolt {
-        info: GodboltMeta,
-        codeblock: String
+    #[derive(Debug)]
+    struct Godbolt<'a> {
+        codeblock: String,
+        compiler: Option<&'a str>,
+        flags: Option<&'a str>,
     }
 
-    impl Godbolt {
-        pub(crate) fn new(info: GodboltMeta, codeblock: String) -> Self {
-            Self {
-                info,
-                codeblock
-            }
+    impl<'a> Godbolt<'a> {
+        pub(crate) fn new(info_string: &'a str, content: &str) -> Option<Self> {
+            let info = parse_info_str(info_string)?;
+
+            let lang = info.get("lang")?;
+            let compiler = info.get("compiler").map(|v| &**v);
+            let flags = info.get("flags").map(|v| &**v);
+            let codeblock = strip_godbolt_from_codeblock(content, &lang);
+
+            eprintln!("{:?}", &info);
+
+            Some(Self {
+                codeblock,
+                compiler,
+                flags
+            })
         }
 
         pub(crate) fn add_godbolt_pre(self) -> String {
@@ -262,14 +268,27 @@ mod libgodbolt {
             let code_start_idx = html.find("<code").unwrap();
             let code_end_idx = html.find("</code>").unwrap() + 7;
             let code_block = &html[code_start_idx..code_end_idx];
-            dbg!(code_block);
 
-            format!("<pre><pre class=\"godbolt\">{}</pre></pre>", code_block)
+            let compiler = &self.compiler.map_or(String::new(), |txt| {
+                format!(" data-godbolt-compiler=\"{}\"", txt)
+            });
+
+            let flags = &self.flags.map_or(String::new(), |txt| {
+                format!(" data-godbolt-flags=\"{}\"", txt)
+            });
+
+            eprintln!("{:?}", &self);
+            eprintln!("{:?}", self.compiler.is_some());
+            eprintln!("{:?}", self.flags.is_some());
+
+            format!(
+                "<pre><pre class=\"godbolt\"{}{}>{}</pre></pre>",
+                compiler, flags, code_block
+            )
         }
     }
 
     fn preprocess(content: &str) -> MdBookResult<String> {
-
         // Get markdown parsing events as iterator
         let events = Parser::new_ext(content, Options::empty());
 
@@ -281,15 +300,12 @@ mod libgodbolt {
             {
                 let code_content = &content[span.start..span.end];
 
-                let godbolt = match extract_godbolt_info(
-                    info_string.as_ref(),
-                    code_content) {
-                    Some(gd) => gd,
+                let godbolt = match Godbolt::new(info_string.as_ref(), code_content) {
+                    Some(gbolt) => gbolt,
                     None => continue,
                 };
 
                 // Adds HTML data around codeblock content
-                // TODO: Add HTML <pre> tag with godbolt class
                 let godbolt_content = godbolt.add_godbolt_pre();
 
                 // Locally store preprocessed blocks
@@ -312,31 +328,27 @@ mod libgodbolt {
         Ok(new_content)
     }
 
-    fn extract_godbolt_info(info_string: &str, content: &str) -> Option<Godbolt> {
-        let info = GodboltMeta::new(info_string)?;
-
-        let codeblock = strip_godbolt_from_codeblock(content, &info);
-
-        Some(Godbolt::new(info, codeblock))
-    }
-
-    fn strip_godbolt_from_codeblock(content: &str, info: &GodboltMeta) -> String {
+    fn strip_godbolt_from_codeblock(content: &str, lang: &str) -> String {
         let start_idx = body_start_index(content);
 
-        format!("```{}\n{}", &info.lang, &content[start_idx..])
+        format!("```{}\n{}", &lang, &content[start_idx..])
             .trim_end()
             .to_string()
     }
 
     fn body_start_index(content: &str) -> usize {
-        let index = content
-            .find('\n')
-            .map(|idx| idx + 1); // Start with character after newline
+        let index = content.find('\n').map(|idx| idx + 1); // Start with character after newline
 
         match index {
             None => 0,
             // Check for out of bounds indexes
-            Some(idx) => if idx > (content.len() - 1) { 0 } else { idx }
+            Some(idx) => {
+                if idx > (content.len() - 1) {
+                    0
+                } else {
+                    idx
+                }
+            }
         }
     }
 }

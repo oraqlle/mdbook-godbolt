@@ -2,7 +2,7 @@
 
 Some text
 
-```cpp,godbolt
+```cpp,godbolt,godbolt-compiler:g151,godbolt-flags:-std=c++20
 $#include <cmath>
 $#include <iostream>
 $
@@ -110,6 +110,10 @@ $    return 0;
 ```
 
 ```rust
+println!("Hi");
+```
+
+```rust,godbolt
 println!("Hi");
 ```
 
