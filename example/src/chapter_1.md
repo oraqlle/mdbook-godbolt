@@ -2,7 +2,7 @@
 
 Some text
 
-```cpp,godbolt,godbolt-compiler:g151,godbolt-flags:-std=c++20
+```cpp,godbolt,godbolt-compiler:g151,godbolt-flags:-std=c++98
 $#include <cmath>
 $#include <iostream>
 $
@@ -25,7 +25,7 @@ $    return 0;
 
 More text
 
-```cpp,
+```cpp
 $#include <cmath>
 $#include <iostream>
 $

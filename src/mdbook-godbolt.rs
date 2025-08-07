@@ -214,6 +214,13 @@ mod libgodbolt {
         }
     }
 
+    fn hljs_lang_to_godbolt(lang: &str) -> &str {
+        match lang {
+            "cpp" => "c++",
+            _ => lang
+        }
+    }
+
     fn parse_info_str(info_string: &str) -> Option<HashMap<&str, &str>> {
         if info_string.contains("godbolt") {
             Some(
@@ -240,6 +247,7 @@ mod libgodbolt {
     #[derive(Debug)]
     struct Godbolt<'a> {
         codeblock: String,
+        lang: &'a str,
         compiler: Option<&'a str>,
         flags: Option<&'a str>,
     }
@@ -248,7 +256,7 @@ mod libgodbolt {
         pub(crate) fn new(info_string: &'a str, content: &str) -> Option<Self> {
             let info = parse_info_str(info_string)?;
 
-            let lang = info.get("lang")?;
+            let lang = hljs_lang_to_godbolt(info.get("lang")?);
             let compiler = info.get("compiler").map(|v| &**v);
             let flags = info.get("flags").map(|v| &**v);
             let codeblock = strip_godbolt_from_codeblock(content, &lang);
@@ -257,6 +265,7 @@ mod libgodbolt {
 
             Some(Self {
                 codeblock,
+                lang,
                 compiler,
                 flags
             })
@@ -269,6 +278,8 @@ mod libgodbolt {
             let code_end_idx = html.find("</code>").unwrap() + 7;
             let code_block = &html[code_start_idx..code_end_idx];
 
+            let lang = format!(" data-godbolt-lang=\"{}\"", &self.lang);
+
             let compiler = &self.compiler.map_or(String::new(), |txt| {
                 format!(" data-godbolt-compiler=\"{}\"", txt)
             });
@@ -277,13 +288,9 @@ mod libgodbolt {
                 format!(" data-godbolt-flags=\"{}\"", txt)
             });
 
-            eprintln!("{:?}", &self);
-            eprintln!("{:?}", self.compiler.is_some());
-            eprintln!("{:?}", self.flags.is_some());
-
             format!(
-                "<pre><pre class=\"godbolt\"{}{}>{}</pre></pre>",
-                compiler, flags, code_block
+                "<pre><pre class=\"godbolt\"{}{}{}>{}</pre></pre>",
+                lang, compiler, flags, code_block
             )
         }
     }

@@ -304,13 +304,15 @@ function playground_text(playground, hidden = true) {
         }
 
         let text = playground_text(code_block);
-        console.log(text);
+        let lang = code_block.getAttribute("data-godbolt-lang");
+        let compiler_code = code_block.getAttribute("data-godbolt-compiler");
+        let flags = code_block.getAttribute("data-godbolt-flags");
 
         var params = {
             "source": text,
-            "compiler": "g141",
+            "compiler": compiler_code,
             "options": {
-                "userArguments": "-O3",
+                "userArguments": `-fdiagnostics-color=never ${flags}`,
                 "compilerOptions": {
                     "executorRequest": true
                 },
@@ -320,7 +322,7 @@ function playground_text(playground, hidden = true) {
                 "tools": [],
                 "libraries": [],
             },
-            "lang": "c++",
+            "lang": lang,
             "allowStoreCodeDebug": true
         };
 
