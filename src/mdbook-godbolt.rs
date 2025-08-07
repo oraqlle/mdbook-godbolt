@@ -261,8 +261,6 @@ mod libgodbolt {
             let flags = info.get("flags").map(|v| &**v);
             let codeblock = strip_godbolt_from_codeblock(content, &lang);
 
-            eprintln!("{:?}", &info);
-
             Some(Self {
                 codeblock,
                 lang,
