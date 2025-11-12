@@ -54,7 +54,7 @@ passed back to the regular processor.
 
 ### Example
 
-```markdown
+````markdown
 ```cpp,godbolt,godbolt-compiler:g151,godbolt-flags:-std=c++17
 #include <cmath>
 #include <iostream>
@@ -74,8 +74,8 @@ auto main() -> int {
 
     return 0;
 }
-\`\`\`
 ```
+````
 
 ## Compiler Code Table
 
