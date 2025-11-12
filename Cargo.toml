@@ -12,6 +12,11 @@ license = "MIT"
 keywords = ["mdbook", "markdown", "godbolt", "playground"]
 readme = "README.md"
 
+exclude = [
+    "godbolt-info/*",
+    "example/*"
+]
+
 [[bin]]
 name = "mdbook-godbolt"
 path = "src/mdbook-godbolt.rs"
