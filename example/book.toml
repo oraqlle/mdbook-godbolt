@@ -9,5 +9,5 @@ cpp = "$"
 
 [preprocessor.godbolt]
 command = "mdbook-godbolt"
-assets_version = "0.3.0" # do not edit: managed by `mdbook-godbolt install`
+assets_version = "0.5.0" # do not edit: managed by `mdbook-godbolt install`
 

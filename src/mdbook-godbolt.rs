@@ -256,10 +256,11 @@ mod libgodbolt {
         pub(crate) fn new(info_string: &'a str, content: &str) -> Option<Self> {
             let info = parse_info_str(info_string)?;
 
-            let lang = hljs_lang_to_godbolt(info.get("lang")?);
+            let orig_lang = info.get("lang")?;
+            let lang = hljs_lang_to_godbolt(&orig_lang);
             let compiler = info.get("compiler").map(|v| &**v);
             let flags = info.get("flags").map(|v| &**v);
-            let codeblock = strip_godbolt_from_codeblock(content, &lang);
+            let codeblock = strip_godbolt_from_codeblock(content, &orig_lang);
 
             Some(Self {
                 codeblock,

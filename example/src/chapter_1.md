@@ -2,7 +2,7 @@
 
 Some text
 
-```cpp,godbolt,godbolt-compiler:g151,godbolt-flags:-std=c++98
+```cpp,godbolt,godbolt-compiler:g151,godbolt-flags:-std=c++17
 $#include <cmath>
 $#include <iostream>
 $
